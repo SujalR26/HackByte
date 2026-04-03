@@ -3,6 +3,7 @@ from fastapi import HTTPException
 
 from app.core.supabase import get_supabase_client
 from app.services.reports import list_user_reports
+from app.services.badges import get_badges_state
 
 
 def _short_id(report_id: str) -> str:
@@ -121,6 +122,7 @@ def get_dashboard(user_id: str) -> dict:
     my_reports = list_user_reports(user_id)
     upvotes_given = get_upvotes_given_count(user_id)
     activity = get_activity_feed(user_id, limit=10)
+    badges = get_badges_state(user_id)
 
     stats = {
         "reports_filed": int(profile.get("reports_submitted") or 0),
@@ -133,4 +135,5 @@ def get_dashboard(user_id: str) -> dict:
         "stats": stats,
         "my_reports": my_reports,
         "activity": activity,
+        "badges": badges,
     }

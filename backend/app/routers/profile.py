@@ -3,6 +3,7 @@ from typing import Any
 
 from app.core.auth import get_current_user, get_current_user_id
 from app.services.profiles import get_profile, get_dashboard, get_activity_feed
+from app.services.badges import get_badges_state
 
 router = APIRouter(prefix="/api", tags=["profile"])
 
@@ -31,3 +32,12 @@ def my_dashboard_endpoint(
 ):
     user_id = get_current_user_id(user)
     return get_dashboard(user_id)
+
+
+@router.get("/me/badges")
+def my_badges_endpoint(
+    user: Any = Depends(get_current_user),
+):
+    user_id = get_current_user_id(user)
+    badges = get_badges_state(user_id)
+    return {"badges": badges}

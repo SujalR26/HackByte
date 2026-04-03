@@ -5,6 +5,7 @@ import math
 from urllib.parse import quote
 
 from app.core.supabase import get_supabase_client
+from app.services.badges import ensure_badges
 
 
 ALLOWED_STATUSES = {"open", "in_review", "resolved", "escalated"}
@@ -39,6 +40,10 @@ def create_report(user_id: str, payload: dict) -> dict:
     except Exception:
         pass
 
+    try:
+        ensure_badges(user_id)
+    except Exception:
+        pass
     return report_data
 
 
@@ -140,6 +145,10 @@ def bulk_update_reports(ids: list[str], status: str) -> dict:
                     {"reports_resolved": current_count + count}
                 ).eq("id", user_id).execute()
                 updated_profiles += 1
+                try:
+                    ensure_badges(user_id)
+                except Exception:
+                    pass
             except Exception:
                 continue
 
@@ -290,7 +299,7 @@ def upvote_report(report_id: str, user_id: str) -> dict:
     try:
         report_res = (
             client.table("reports")
-            .select("id,upvotes,status")
+            .select("id,user_id,upvotes,status")
             .eq("id", report_id)
             .single()
             .execute()
@@ -316,6 +325,7 @@ def upvote_report(report_id: str, user_id: str) -> dict:
 
     current_upvotes = int(report_res.data.get("upvotes") or 0)
     current_status = report_res.data.get("status")
+    report_owner_id = report_res.data.get("user_id")
 
     new_upvotes = current_upvotes + 1
     update_payload = {"upvotes": new_upvotes}
@@ -326,6 +336,12 @@ def upvote_report(report_id: str, user_id: str) -> dict:
         client.table("reports").update(update_payload).eq("id", report_id).execute()
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Report update failed: {exc}") from exc
+
+    if report_owner_id:
+        try:
+            ensure_badges(report_owner_id)
+        except Exception:
+            pass
 
     return {
         "report_id": report_id,

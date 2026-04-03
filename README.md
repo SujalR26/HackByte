@@ -30,6 +30,7 @@ User: `GET /api/reports/:id/share-payload` gets share-ready payload/URLs (Featur
 User: `GET /api/me/profile` returns role + profile counters for dashboard boot.
 User: `GET /api/me/activity` returns recent dashboard notifications.
 User: `GET /api/me/dashboard` returns profile + stats + reports + activity bundle.
+User: `GET /api/me/badges` returns badge state for the dashboard row.
 
 **Required env vars**
 ```
@@ -194,6 +195,12 @@ curl -X GET "http://localhost:8000/api/me/activity" ^
 **My dashboard bundle (curl)**
 ```
 curl -X GET "http://localhost:8000/api/me/dashboard" ^
+  -H "Authorization: Bearer <SUPABASE_ACCESS_TOKEN>"
+```
+
+**My badges (curl)**
+```
+curl -X GET "http://localhost:8000/api/me/badges" ^
   -H "Authorization: Bearer <SUPABASE_ACCESS_TOKEN>"
 ```
 
